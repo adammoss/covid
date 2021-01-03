@@ -1,4 +1,4 @@
-Date,ENGLAND,East of England,London,Midlands,North East and Yorkshire,North West,South East,South West
+date,ENGLAND,East of England,London,Midlands,North East and Yorkshire,North West,South East,South West
 01-Aug-20,74,9,16,13,9,15,12,0
 02-Aug-20,72,9,15,10,8,15,15,0
 03-Aug-20,67,8,17,10,7,13,12,0
@@ -151,3 +151,7 @@ Date,ENGLAND,East of England,London,Midlands,North East and Yorkshire,North West
 28-Dec-20,"1,641",156,556,278,159,175,258,59
 29-Dec-20,"1,728",175,599,285,156,171,284,58
 30-Dec-20,"1,854",197,640,306,166,188,290,67
+31-Dec-20,"1,899",187,664,305,169,198,301,75
+01-Jan-21,"1,940",199,657,312,179,195,324,74
+02-Jan-21,"2,017",208,713,324,177,183,333,79
+03-Jan-21,"2,181",221,772,359,189,211,346,83

@@ -80,3 +80,123 @@ def get_uec_sitrep(year):
     df = pd.merge(df_available, df_occupied, on=['date', 'code', 'areaName', 'trust'])
     df = df.replace('-', np.nan)
     return df
+
+
+def get_total_deaths(year):
+    assert year in range(2010, 2021)
+    if year == 2020:
+        filename = 'publishedweek512020corrected.xlsx'
+        skiprows = 4
+        total_row = 3
+        region_row_min = 80
+        region_row_max = 91
+        engine = 'openpyxl'
+        inicolumns = 2
+    elif year == 2019:
+        filename = 'publishedweek522019.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 2
+    elif year == 2018:
+        filename = 'publishedweek522018withupdatedrespiratoryrow.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 2
+    elif year == 2017:
+        filename = 'publishedweek522017.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 2
+    elif year == 2016:
+        filename = 'publishedweek522016.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 2
+    elif year == 2015:
+        filename = 'publishedweek2015.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 1
+    elif year == 2014:
+        filename = 'publishedweek2014.xls'
+        skiprows = 2
+        total_row = 3
+        region_row_min = 38
+        region_row_max = 49
+        engine = 'xlrd'
+        inicolumns = 1
+    elif year == 2013:
+        filename = 'publishedweek2013.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 1
+    elif year == 2012:
+        filename = 'publishedweek2012.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 1
+    elif year == 2011:
+        filename = 'publishedweek2011.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 38
+        region_row_max = 49
+        engine = 'xlrd'
+        inicolumns = 1
+    elif year == 2010:
+        filename = 'publishedweek2010.xls'
+        skiprows = 3
+        total_row = 3
+        region_row_min = 37
+        region_row_max = 48
+        engine = 'xlrd'
+        inicolumns = 1
+    userows = []
+    for i in range(1000):
+        if i == total_row or region_row_min < i < region_row_max:
+            userows.append(i)
+    try:
+        df = pd.read_excel('../data/all_cause_mortality/' + filename, engine=engine,
+                           sheet_name='Weekly figures ' + str(year), skiprows=skiprows)
+    except:
+        df = pd.read_excel('../data/all_cause_mortality/' + filename, engine=engine,
+                           sheet_name='Weekly Figures ' + str(year), skiprows=skiprows)
+    df.dropna(how='all', inplace=True)
+    for i, row in df.iterrows():
+        if i not in userows:
+            df.drop(index=i, inplace=True)
+    if inicolumns == 1:
+        df = df.rename(columns={'Week number': 'areaName'})
+        df.at[3, 'areaName'] = 'Total'
+    elif inicolumns == 2:
+        df = df.rename(columns={'Unnamed: 1': 'areaName'})
+        df.at[3, 'areaName'] = 'Total'
+        df.drop(columns='Week number', inplace=True)
+    df = df.set_index('areaName').T
+    df.reset_index(inplace=True)
+    df.rename(columns={'index': 'week'}, inplace=True)
+    df = df.rename_axis(None, axis=1).rename_axis('id', axis=0)
+    df = pd.melt(df, id_vars=['week'], var_name='areaName', value_name='totalDeaths')
+    df["totalDeaths"] = pd.to_numeric(df["totalDeaths"], errors='coerce')
+    return df

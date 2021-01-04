@@ -1,20 +1,28 @@
 import pandas as pd
 import numpy as np
+from bs4 import BeautifulSoup
+import requests
 from functools import reduce
 import os
 import datetime
 
 
 def get_covid_activity():
-    base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2021/01/'
-    filename = 'COVID-19-daily-admissions-and-beds-20210103.xlsx'
+    url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-hospital-activity/'
+    resp = requests.get(url)
+    soup = BeautifulSoup(resp.content, 'html.parser')
+    file_url = None
+    for link in soup.find_all('a'):
+        if 'xlsx' in link['href'] and 'daily' in link['href']:
+            file_url = link['href']
+    assert file_url is not None
     data = [
         {'metric': 'hospitalCases', 'first_row': 88, 'first_col': 1},
         {'metric': 'covidOccupiedMVBeds', 'first_row': 103, 'first_col': 1}
     ]
     dfs = []
     for d in data:
-        df = pd.read_excel(os.path.join(base_url, filename), engine='openpyxl', skiprows=d['first_row'], nrows=8,
+        df = pd.read_excel(file_url, engine='openpyxl', skiprows=d['first_row'], nrows=8,
                            usecols=np.arange(d['first_col'], 1000))
         df = df.set_index('Name').T
         df.reset_index(inplace=True)

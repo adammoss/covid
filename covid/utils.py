@@ -5,6 +5,7 @@ import requests
 from functools import reduce
 import os
 import datetime
+from io import BytesIO
 
 
 def get_covid_activity():
@@ -94,7 +95,7 @@ def get_ons_deaths(year):
     assert year in range(2010, 2021)
     date_row = 0
     if year == 2020:
-        filename = 'publishedweek512020corrected.xlsx'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2020/publishedweek512020corrected.xlsx'
         skiprows = 4
         total_row = 3
         region_row_min = 80
@@ -102,7 +103,7 @@ def get_ons_deaths(year):
         engine = 'openpyxl'
         ini_columns = 2
     elif year == 2019:
-        filename = 'publishedweek522019.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2019/publishedweek522019.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
@@ -110,7 +111,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 2
     elif year == 2018:
-        filename = 'publishedweek522018withupdatedrespiratoryrow.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2018/publishedweek522018withupdatedrespiratoryrow.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
@@ -118,7 +119,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 2
     elif year == 2017:
-        filename = 'publishedweek522017.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2017/publishedweek522017.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
@@ -126,7 +127,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 2
     elif year == 2016:
-        filename = 'publishedweek522016.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2016/publishedweek522016.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
@@ -134,7 +135,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 2
     elif year == 2015:
-        filename = 'publishedweek2015.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2015/publishedweek2015.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
@@ -142,7 +143,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 1
     elif year == 2014:
-        filename = 'publishedweek2014.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2014/publishedweek2014.xls'
         skiprows = 2
         total_row = 3
         region_row_min = 38
@@ -150,7 +151,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 1
     elif year == 2013:
-        filename = 'publishedweek2013.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2013/publishedweek2013.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
@@ -158,7 +159,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 1
     elif year == 2012:
-        filename = 'publishedweek2012.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2012/publishedweek2012.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
@@ -166,7 +167,7 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 1
     elif year == 2011:
-        filename = 'publishedweek2011.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2011/publishedweek2011.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 38
@@ -174,22 +175,26 @@ def get_ons_deaths(year):
         engine = 'xlrd'
         ini_columns = 1
     elif year == 2010:
-        filename = 'publishedweek2010.xls'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2010/publishedweek2010.xls'
         skiprows = 3
         total_row = 3
         region_row_min = 37
         region_row_max = 48
         engine = 'xlrd'
         ini_columns = 1
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'
+    }
+    resp = requests.get(url, headers=headers)
     userows = []
     for i in range(1000):
         if i == date_row or i == total_row or region_row_min < i < region_row_max:
             userows.append(i)
     try:
-        df = pd.read_excel('../data/all_cause_mortality/' + filename, engine=engine,
+        df = pd.read_excel(BytesIO(resp.content), engine=engine,
                            sheet_name='Weekly figures ' + str(year), skiprows=skiprows)
     except:
-        df = pd.read_excel('../data/all_cause_mortality/' + filename, engine=engine,
+        df = pd.read_excel(BytesIO(resp.content), engine=engine,
                            sheet_name='Weekly Figures ' + str(year), skiprows=skiprows)
     df.dropna(how='all', inplace=True)
     for i, row in df.iterrows():

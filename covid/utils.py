@@ -6,6 +6,7 @@ from functools import reduce
 import os
 import datetime
 from io import BytesIO
+from uk_covid19 import Cov19API
 
 
 def get_covid_activity():
@@ -14,7 +15,7 @@ def get_covid_activity():
     soup = BeautifulSoup(resp.content, 'html.parser')
     file_url = None
     for link in soup.find_all('a'):
-        if 'xlsx' in link['href'] and 'daily' in link['href']:
+        if '.xls' in link['href'] and 'daily' in link['href']:
             file_url = link['href']
     assert file_url is not None
     data = [
@@ -215,3 +216,63 @@ def get_ons_deaths(year):
     df = pd.melt(df, id_vars=['week', 'date'], var_name='areaName', value_name='totalDeaths')
     df["totalDeaths"] = pd.to_numeric(df["totalDeaths"], errors='coerce')
     return df
+
+
+def get_region_data(metrics=None, nhs_metrics=None):
+    if metrics is None:
+        metrics = [
+            "newCasesByPublishDate",
+            "newCasesBySpecimenDate",
+            "newDeathsByDeathDate",
+            "uniquePeopleTestedBySpecimenDateRollingSum",
+            "uniqueCasePositivityBySpecimenDateRollingSum",
+            "newDeaths28DaysByPublishDate",
+            "newDeaths28DaysByDeathDate",
+        ]
+    structure = {
+        "date": "date",
+        "areaName": "areaName",
+    }
+    for metric in metrics:
+        structure[metric] = metric
+    filters = [
+        "areaType=region",
+    ]
+    api = Cov19API(
+        filters=filters,
+        structure=structure
+    )
+    df_region = api.get_dataframe()
+    df_region['date'] = pd.to_datetime(df_region['date'])
+    if nhs_metrics is None:
+        nhs_metrics = [
+            "newAdmissions",
+            "covidOccupiedMVBeds",
+            "hospitalCases"
+        ]
+    structure = {
+        "date": "date",
+        "areaName": "areaName",
+    }
+    for metric in nhs_metrics:
+        structure[metric] = metric
+    filters = [
+        "areaType=nhsRegion"
+    ]
+    api = Cov19API(
+        filters=filters,
+        structure=structure
+    )
+    df_nhs_region = api.get_dataframe()
+    df_nhs_region['date'] = pd.to_datetime(df_nhs_region['date'])
+    # Combine regions to be the same as NHS regions
+    df_region['areaName'] = df_region['areaName'].replace({'Yorkshire and The Humber': 'North East and Yorkshire',
+                                                           'North East': 'North East and Yorkshire',
+                                                           'East Midlands': 'Midlands',
+                                                           'West Midlands': 'Midlands'})
+    df_grouped_region = df_region.groupby(['date', 'areaName'], as_index=False).sum()
+    # Merge data from regions and NHS regions
+    df = pd.merge(df_grouped_region, df_nhs_region, on=['date', 'areaName'], how='outer')
+    return df
+
+

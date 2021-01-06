@@ -96,7 +96,7 @@ def get_ons_deaths(year):
     assert year in range(2010, 2021)
     date_row = 0
     if year == 2020:
-        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2020/publishedweek512020corrected.xlsx'
+        url = 'https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fbirthsdeathsandmarriages%2fdeaths%2fdatasets%2fweeklyprovisionalfiguresondeathsregisteredinenglandandwales%2f2020/publishedweek522020.xlsx'
         skiprows = 4
         total_row = 3
         region_row_min = 80

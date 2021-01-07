@@ -37,8 +37,8 @@ def get_covid_activity():
 
 def get_uec_sitrep(year):
     if year == '202021':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2020/12/'
-        filename = 'UEC-Daily-SitRep-Acute-Web-File-Timeseries-5.xlsx'
+        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2021/01/'
+        filename = 'UEC-Daily-SitRep-Acute-Web-File-Timeseries.xlsx'
         occupancy_fraction = False
     elif year == '201920':
         base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2020/03/'

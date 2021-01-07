@@ -37,34 +37,35 @@ def get_covid_activity():
 
 def get_uec_sitrep(year):
     if year == '202021':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2021/01/'
-        filename = 'UEC-Daily-SitRep-Acute-Web-File-Timeseries.xlsx'
+        url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/uec-sitrep/urgent-and-emergency-care-daily-situation-reports-2020-21/'
         occupancy_fraction = False
     elif year == '201920':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2020/03/'
-        filename = 'Winter-SitRep-Acute-Time-series-2-December-2019-1-March-2020.xlsx'
+        url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/winter-daily-sitreps/winter-daily-sitrep-2019-20-data/'
         occupancy_fraction = True
     elif year == '201819':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2019/03/'
-        filename = 'Winter-data-timeseries-20190307.xlsx'
+        url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/winter-daily-sitreps/winter-daily-sitrep-2018-19-data/'
         occupancy_fraction = True
     elif year == '201718':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2018/03/'
-        filename = 'Winter-data-Timeseries-20180304.xlsx'
+        url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/winter-daily-sitreps/winter-daily-sitrep-2017-18-data/'
         occupancy_fraction = True
     elif year == '201617':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2016/12/'
-        filename = 'DailySR-Web-file-Time-Series-18.xlsx'
+        url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/winter-daily-sitreps/winter-daily-sitrep-2016-17-data/'
         occupancy_fraction = False
     elif year == '201516':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2015/12/'
-        filename = 'DailySR-Timeseries-WE-28.02.16.xlsx'
+        url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/winter-daily-sitreps/winter-daily-sitrep-2015-16-data/'
         occupancy_fraction = False
     elif year == '201415':
-        base_url = 'https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2014/12/'
-        filename = 'DailySR-Timeseries-WE-29.03.15.xlsx'
+        url = 'https://www.england.nhs.uk/statistics/statistical-work-areas/winter-daily-sitreps/winter-daily-sitrep-2014-15-data/'
         occupancy_fraction = False
-    df = pd.read_excel(os.path.join(base_url, filename), engine='openpyxl', skiprows=13, nrows=1000,
+    resp = requests.get(url)
+    soup = BeautifulSoup(resp.content, 'html.parser')
+    file_url = None
+    for link in soup.find_all('a'):
+        if '.xls' in link['href'] and ('Acute' in link['href'] or 'Acute' in link.text):
+            file_url = link['href']
+            break
+    assert file_url is not None
+    df = pd.read_excel(file_url, engine='openpyxl', skiprows=13, nrows=1000,
                        sheet_name='Adult critical care', usecols=[1, 3] + np.arange(4, 1000).tolist())
     df.dropna(how='all', inplace=True)
     df.drop(index=0, inplace=True)
